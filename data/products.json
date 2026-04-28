@@ -1,0 +1,219 @@
+[
+    {
+        "id": 1,
+        "name": "Bell Pepper",
+        "price": 80.0,
+        "image": "images/product-1.jpg",
+        "category": "Vegetables"
+    },
+    {
+        "id": 2,
+        "name": "Strawberry",
+        "price": 120.0,
+        "image": "images/product-2.jpg",
+        "category": "Fruits"
+    },
+    {
+        "id": 3,
+        "name": "Green Beans",
+        "price": 120.0,
+        "image": "images/product-3.jpg",
+        "category": "Vegetables"
+    },
+    {
+        "id": 4,
+        "name": "Purple Cabbage",
+        "price": 120.0,
+        "image": "images/product-4.jpg",
+        "category": "Vegetables"
+    },
+    {
+        "id": 5,
+        "name": "Tomatoe",
+        "price": 80.0,
+        "image": "images/product-5.jpg",
+        "category": "Vegetables"
+    },
+    {
+        "id": 6,
+        "name": "Broccoli",
+        "price": 120.0,
+        "image": "images/product-6.jpg",
+        "category": "Vegetables"
+    },
+    {
+        "id": 7,
+        "name": "Carrots",
+        "price": 120.0,
+        "image": "images/product-7.jpg",
+        "category": "Vegetables"
+    },
+    {
+        "id": 8,
+        "name": "Fruit Juice",
+        "price": 120.0,
+        "image": "images/product-8.jpg",
+        "category": "Juice"
+    },
+    {
+        "id": 9,
+        "name": "Onion",
+        "price": 80.0,
+        "image": "images/product-9.jpg",
+        "category": "Vegetables"
+    },
+    {
+        "id": 10,
+        "name": "Apple",
+        "price": 120.0,
+        "image": "images/product-10.jpg",
+        "category": "Fruits"
+    },
+    {
+        "id": 11,
+        "name": "Garlic",
+        "price": 120.0,
+        "image": "images/product-11.jpg",
+        "category": "Vegetables"
+    },
+    {
+        "id": 12,
+        "name": "Chilli",
+        "price": 120.0,
+        "image": "images/product-12.jpg",
+        "category": "Vegetables"
+    },
+    {
+        "id": 13,
+        "name": "Ginger",
+        "price": 50.0,
+        "image": "images/product-13.jpg",
+        "category": "Vegetables"
+    },
+    {
+        "id": 14,
+        "name": "Spinach",
+        "price": 30.0,
+        "image": "images/product-14.jpg",
+        "category": "Vegetables"
+    },
+    {
+        "id": 15,
+        "name": "Potato",
+        "price": 40.0,
+        "image": "images/product-15.jpg",
+        "category": "Vegetables"
+    },
+    {
+        "id": 16,
+        "name": "Orange Juice",
+        "price": 95.0,
+        "image": "images/product-16.jpg",
+        "category": "Juice"
+    },
+    {
+        "id": 17,
+        "name": "Banana",
+        "price": 25.0,
+        "image": "images/product-17.jpg",
+        "category": "Fruits"
+    },
+    {
+        "id": 18,
+        "name": "Watermelon",
+        "price": 150.0,
+        "image": "images/product-18.jpg",
+        "category": "Fruits"
+    },
+    {
+        "id": 19,
+        "name": "Pineapple",
+        "price": 110.0,
+        "image": "images/product-19.jpg",
+        "category": "Fruits"
+    },
+    {
+        "id": 20,
+        "name": "Lemon",
+        "price": 15.0,
+        "image": "images/product-20.jpg",
+        "category": "Fruits"
+    },
+    {
+        "id": 21,
+        "name": "Cucumber",
+        "price": 45.0,
+        "image": "images/product-21.jpg",
+        "category": "Vegetables"
+    },
+    {
+        "id": 22,
+        "name": "Pear",
+        "price": 85.0,
+        "image": "images/product-22.jpg",
+        "category": "Fruits"
+    },
+    {
+        "id": 23,
+        "name": "Mango",
+        "price": 130.0,
+        "image": "images/product-23.jpg",
+        "category": "Fruits"
+    },
+    {
+        "id": 24,
+        "name": "Grapes",
+        "price": 160.0,
+        "image": "images/product-24.jpg",
+        "category": "Fruits"
+    },
+    {
+        "id": 25,
+        "name": "Cherry",
+        "price": 200.0,
+        "image": "images/product-25.jpg",
+        "category": "Fruits"
+    },
+    {
+        "id": 26,
+        "name": "Blueberry",
+        "price": 180.0,
+        "image": "images/product-26.jpg",
+        "category": "Fruits"
+    },
+    {
+        "id": 27,
+        "name": "Cabbage",
+        "price": 55.0,
+        "image": "images/product-27.jpg",
+        "category": "Vegetables"
+    },
+    {
+        "id": 28,
+        "name": "Mushroom",
+        "price": 90.0,
+        "image": "images/product-28.jpg",
+        "category": "Vegetables"
+    },
+    {
+        "id": 29,
+        "name": "Avocado",
+        "price": 140.0,
+        "image": "images/product-29.jpg",
+        "category": "Fruits"
+    },
+    {
+        "id": 30,
+        "name": "Corn",
+        "price": 35.0,
+        "image": "images/product-30.jpg",
+        "category": "Vegetables"
+    },
+    {
+        "id": 31,
+        "name": "PopCorn",
+        "price": 35.0,
+        "image": "images/product-31.jpg",
+        "category": "Dried"
+    }
+]

@@ -105,8 +105,8 @@
     				</ul>
     			</div>
     		</div>
-    		<div class="row">
-    			<div class="col-md-6 col-lg-3 ftco-animate">
+    		<div id="product-container" class="row">
+    			<!-- <div class="col-md-6 col-lg-3 ftco-animate">
     				<div class="product">
     					<a href="#" class="img-prod"><img class="img-fluid" src="images/product-1.jpg" alt="Colorlib Template">
     						<span class="status">30%</span>
@@ -447,7 +447,7 @@
     						</div>
     					</div>
     				</div>
-    			</div>
+    			</div> -->
     		</div>
     		<div class="row mt-5">
           <div class="col text-center">
@@ -581,6 +581,159 @@
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVWaKrjvy3MaE7SQ74_uJiULgl1JY0H2s&sensor=false"></script>
   <script src="js/google-map.js"></script>
   <script src="js/main.js"></script>
-    
+  <script>
+	// const loadProducts = async () => {
+	// 	const container = document.querySelector('#product-container');
+
+	// 	try {
+	// 		const response = await fetch('./data/products.json');
+			
+	// 		if (!response.ok) {
+	// 			throw new Error(`HTTP error! status: ${response.status}`);
+	// 		}
+
+	// 		const products = await response.json();
+
+	// 		// Map through products and generate HTML strings
+	// 		const productHTML = products.map(product => `
+	// 			<div class="col-md-6 col-lg-3 ftco-animate fadeInUp ftco-animated">
+	// 				<div class="product">
+	// 					<a href="#" class="img-prod">
+	// 						<img class="img-fluid" src="${product.image}" alt="${product.name}">
+	// 						<div class="overlay"></div>
+	// 					</a>
+	// 					<div class="text py-3 pb-4 px-3 text-center">
+	// 						<h3><a href="#">${product.name}</a></h3>
+	// 						<div class="d-flex">
+	// 							<div class="pricing">
+	// 								<p class="price"><span>$${product.price.toFixed(2)}</span></p>
+	// 							</div>
+	// 						</div>
+	// 						<div class="bottom-area d-flex px-3">
+	// 							<div class="m-auto d-flex">
+	// 								<a href="#" class="add-to-cart d-flex justify-content-center align-items-center text-center">
+	// 									<span><i class="ion-ios-menu"></i></span>
+	// 								</a>
+	// 								<a href="#" class="buy-now d-flex justify-content-center align-items-center mx-1">
+	// 									<span><i class="ion-ios-cart"></i></span>
+	// 								</a>
+	// 								<a href="#" class="heart d-flex justify-content-center align-items-center">
+	// 									<span><i class="ion-ios-heart"></i></span>
+	// 								</a>
+	// 							</div>
+	// 						</div>
+	// 					</div>
+	// 				</div>
+	// 			</div>
+	// 		`).join('');
+
+	// 		// Inject into the container
+	// 		container.innerHTML = productHTML;
+
+	// 	} catch (error) {
+	// 		console.error("Failed to load products:", error);
+	// 		container.innerHTML = `
+	// 			<div class="col-md-12 text-center">
+	// 				<p class="alert alert-danger">Sorry, we couldn't load the products at this time.</p>
+	// 			</div>
+	// 		`;
+	// 	}
+	// };
+	// // Initialize the call
+	// loadProducts();
+		/**
+	 * 1. INITIAL TRIGGER (EntryPoint)
+	 * This function kicks off the process as defined in your sequence diagram.
+	 */
+	const requestProducts = () => {
+		console.log("Sequence Start: Requesting product data...");
+		// The sequence flows from here to the fetch function
+		const JSON_PATH = './data/products.json';
+		fetchProducts(JSON_PATH);
+	};
+
+	/**
+	 * 2. FETCH DATA (Data Retrieval)
+	 * Handles the asynchronous communication with the server or local file system.
+	 */
+	const fetchProducts = (path) => {
+		// The 'fetch' API returns a Promise
+		fetch(path)
+			.then(response => {
+				// Check if the server responded successfully (status 200-299)
+				if (!response.ok) {
+					throw new Error(`Network response was not ok: ${response.status}`);
+				}
+				// Parse the body of the response as JSON
+				return response.json();
+			})
+			.then(data => {
+				console.log("Data successfully fetched. Flowing to renderUI...");
+				// Once data is ready, flow passes to the rendering function
+				renderUI(data);
+			})
+			.catch(error => {
+				// Error catch: Handles failures in the fetch or parsing phase
+				console.error("Sequence Interrupted: Fetch error:", error);
+				document.querySelector('#product-container').innerHTML = 
+					`<p class="text-danger">Error loading products. Please try again later.</p>`;
+			});
+	};
+
+	/**
+	 * 3. RENDER UI (DOM Manipulation)
+	 * Transforms the raw JSON data into the specific HTML structure for the grid.
+	 */
+	const renderUI = (products) => {
+		const container = document.querySelector('#product-container');
+		
+		// Clear the container before rendering to avoid duplicates
+		container.innerHTML = '';
+
+		// Data Flow: Iterate through each object in the products array
+		products.forEach(product => {
+			// Create the HTML block using the structure provided
+			const productHTML = `
+				<div class="col-md-6 col-lg-3 ftco-animate fadeInUp ftco-animated">
+					<div class="product">
+						<a href="#" class="img-prod">
+							<img class="img-fluid" src="${product.image}" alt="${product.name}">
+							<div class="overlay"></div>
+						</a>
+						<div class="text py-3 pb-4 px-3 text-center">
+							<h3><a href="#">${product.name}</a></h3>
+							<div class="d-flex">
+								<div class="pricing">
+									<p class="price"><span>$${product.price.toFixed(2)}</span></p>
+								</div>
+							</div>
+							<div class="bottom-area d-flex px-3">
+								<div class="m-auto d-flex">
+									<a href="#" class="add-to-cart d-flex justify-content-center align-items-center text-center">
+										<span><i class="ion-ios-menu"></i></span>
+									</a>
+									<a href="#" class="buy-now d-flex justify-content-center align-items-center mx-1">
+										<span><i class="ion-ios-cart"></i></span>
+									</a>
+									<a href="#" class="heart d-flex justify-content-center align-items-center">
+										<span><i class="ion-ios-heart"></i></span>
+									</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>`;
+
+			// Append the generated HTML to the DOM container
+			container.insertAdjacentHTML('beforeend', productHTML);
+		});
+
+		console.log("Sequence Complete: UI Populated.");
+	};
+
+	// Start the sequence on page load
+	document.addEventListener('DOMContentLoaded', requestProducts);
+
+   </script>
   </body>
 </html>
