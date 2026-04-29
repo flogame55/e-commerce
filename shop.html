@@ -664,15 +664,23 @@
 			const searchInput = document.querySelector('#search-input');
 			const categoryLinks = document.querySelectorAll('.product-category li a');
 
+			// Editable setting for search debounce (in milliseconds)
+			const SEARCH_DELAY_MS = 1000; // 1000ms = 1 second
+			let debounceTimer;
+
 			// Form Submit: Prevents reload when the user hits Enter or clicks the Search button
 			searchForm.addEventListener('submit', (e) => {
 				e.preventDefault();
+				clearTimeout(debounceTimer); // Clear any pending debounced search
 				applyFilters();
 			});
 
-			// Real-time Search: Triggers every time the user types in the search box
+			// Real-time Search with Debouncing: Waits until the user stops typing
 			searchInput.addEventListener('input', () => {
-				applyFilters();
+				clearTimeout(debounceTimer);
+				debounceTimer = setTimeout(() => {
+					applyFilters();
+				}, SEARCH_DELAY_MS);
 			});
 
 			// Category System: Triggers when the user clicks a category menu item
