@@ -344,3 +344,13 @@ setInterval(function() { makeTimer(); }, 1000);
 
 })(jQuery);
 
+// Global Cart UI Updater
+$(document).ready(function() {
+	let cart = JSON.parse(localStorage.getItem('cart')) || [];
+	const totalCount = cart.reduce((total, item) => total + item.quantity, 0);
+	
+	const badge = document.querySelector('.icon-shopping_cart');
+	if (badge && badge.parentElement) {
+		badge.parentElement.innerHTML = `<span class="icon-shopping_cart"></span>[${totalCount}]`;
+	}
+});
