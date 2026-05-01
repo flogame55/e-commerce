@@ -118,7 +118,7 @@ const updateDisplay = () => {
 const renderPagination = (totalItems) => {
     const paginationContainer = document.querySelector('#pagination-container ul');
     if (!paginationContainer) return;
-    
+
     paginationContainer.innerHTML = '';
 
     const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -157,7 +157,7 @@ const renderPagination = (totalItems) => {
 const renderUI = (products) => {
     const container = document.querySelector('#product-container');
     if (!container) return;
-    
+
     container.innerHTML = '';
 
     if (products.length === 0) {
@@ -212,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
+
     // Auto start on page load
     requestProducts();
 });

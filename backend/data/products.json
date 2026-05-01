@@ -215,5 +215,12 @@
         "price": 35.0,
         "image": "images/product-31.jpg",
         "category": "Dried"
+    },
+    {
+        "id": 32,
+        "name": "MaMa",
+        "price": 35.0,
+        "image": "images/product-31.jpg",
+        "category": "Fruits"
     }
 ]
