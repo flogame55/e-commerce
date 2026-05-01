@@ -1,54 +1,58 @@
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
+const sqlite3 = require('sqlite3').verbose();
 const productRoutes = require('./routes/products'); // Modular Route Import
 
 const app = express();
 const PORT = 3000;
+const dbPath = path.join(__dirname, 'database.db');
 
 // --- 1. MIDDLEWARE CONFIGURATION ---
-
-/** 
- * CORS: Essential since your frontend (root) and backend (/backend folder) 
- * are technically separate origins during development.
- */
 app.use(cors());
-
-/**
- * Body Parser: Allows Express to read JSON data sent in POST/PUT requests,
- * which you will need when saving the shopping cart to the database.
- */
 app.use(express.json());
-
-// --- 2. STATIC FILE SERVING ---
-
-/**
- * Serving Frontend: Because server.js is inside the /backend/ folder, 
- * we use '../' to point Express to your HTML, CSS, and JS files 
- * located in the root directory.
- */
 app.use(express.static(path.join(__dirname, '../')));
 
-// --- 3. API ROUTE MOUNTING ---
+// --- CATEGORY FILTER ROUTE (must be before 404 handler) ---
+const allowedCategories = ['Vegetables', 'Fruits', 'Juice', 'Dried', 'Hat', 'All'];
+const gatekeeper = (req, res, next) => {
+    const requestedCategory = req.query.category;
+    if (requestedCategory && allowedCategories.includes(requestedCategory)) {
+        console.log(`Gatekeeper: Access Granted for ${requestedCategory}`);
+        next();
+    } else {
+        console.log(`Gatekeeper: Access Denied for ${requestedCategory}`);
+        res.status(403).json({ status: "Fail", message: "Invalid Category Envelope" });
+    }
+};
+app.get('/api/products/filter', gatekeeper, (req, res) => {
+    const category = req.query.category;
+    const db = new sqlite3.Database(dbPath);
+    let sql = "SELECT * FROM products";
+    let params = [];
+    if (category && category !== 'All') {
+        sql += " WHERE category = ?";
+        params.push(category);
+    }
+    db.all(sql, params, (err, rows) => {
+        db.close();
+        if (err) {
+            res.status(500).json({ status: "Fail", error: err.message });
+        } else {
+            res.status(200).json(rows);
+        }
+    });
+});
 
-/**
- * Product Routes: All requests starting with /api/products will be 
- * handled by the modular products.js route file.
- */
+// --- OTHER PRODUCT ROUTES ---
 app.use('/api/products', productRoutes);
 
-// --- 4. ERROR HANDLING ---
-
-/**
- * 404 Handler: Catches any requests that don't match your static 
- * files or API routes.
- */
+// --- 404 HANDLER (must be last) ---
 app.use((req, res) => {
     res.status(404).json({ message: "API endpoint not found" });
 });
 
-// --- 5. START SERVER ---
-
+// --- START SERVER ---
 app.listen(PORT, () => {
     console.log(`==========================================`);
     console.log(`  E-Commerce Backend Server is Running!   `);

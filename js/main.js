@@ -356,57 +356,56 @@ let cart = JSON.parse(localStorage.getItem('cart')) || []; // Persistent Cart
 
 // 2. INITIALIZATION ON PAGE LOAD
 document.addEventListener('DOMContentLoaded', () => {
-	requestProducts();  // Fetch data for shop.html
-	renderCartTable();  // Draw table if on cart.html
-	updateCartUI();     // Sync navbar counter
+	requestProducts();
+    updateCartUI();
 });
 
 // 3. BACKEND COMMUNICATION
 async function requestProducts() {
-	try {
-		const response = await fetch(API_URL);
-		if (!response.ok) throw new Error("Backend connection failed");
-
-		allProducts = await response.json();
-		renderUI(allProducts); // Initial draw of all products
-	} catch (error) {
-		console.error("Fetch error:", error);
-		const container = document.querySelector('#product-container');
-		if (container) {
-			container.innerHTML = '<h3 class="text-center">Error loading products. Is the server running?</h3>';
-		}
-	}
+    try {
+        const response = await fetch('http://localhost:3000/api/products');
+        allProducts = await response.json();
+        renderUI(allProducts);
+    } catch (error) {
+        console.error("Load error:", error);
+    }
 }
 
-// 4. UI RENDERER: SHOP GRID (shop.html)
+/* --- THE UI RENDERER (The part that updates your screen) --- */
 function renderUI(products) {
-	const container = document.querySelector('#product-container');
-	if (!container) return; // Exit if not on shop.html
+    const container = document.querySelector('#product-container');
+    if (!container) return;
 
-	container.innerHTML = '';
+    // CRITICAL FIX: Clear the old products before showing new ones
+    container.innerHTML = ''; 
 
-	products.forEach(product => {
-		const html = `
-            <div class="col-md-6 col-lg-3 ftco-animate fadeInUp ftco-animated">
-                <div class="product">
-                    <a href="#" class="img-prod"><img class="img-fluid" src="${product.image}" alt="${product.name}"></a>
-                    <div class="text py-3 pb-4 px-3 text-center">
-                        <h3><a href="#">${product.name}</a></h3>
-                        <div class="pricing">
-                            <p class="price"><span>$${Number(product.price).toFixed(2)}</span></p>
-                        </div>
-                        <div class="bottom-area d-flex px-3">
-                            <div class="m-auto d-flex">
-                                <a href="#" class="add-to-cart d-flex justify-content-center align-items-center text-center" data-id="${product.id}">
-                                    <span><i class="ion-ios-cart"></i></span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>`;
-		container.insertAdjacentHTML('beforeend', html);
-	});
+    if (products.length === 0) {
+        container.innerHTML = '<div class="col-12 text-center"><h3>No products found in this category.</h3></div>';
+        return;
+    }
+
+	// Build the new grid without animation classes
+	const html = products.map(p => `
+		<div class="col-md-6 col-lg-3">
+			<div class="product">
+				<a href="#" class="img-prod"><img class="img-fluid" src="${p.image}" alt="${p.name}"></a>
+				<div class="text py-3 pb-4 px-3 text-center">
+					<h3><a href="#">${p.name}</a></h3>
+					<div class="pricing">
+						<p class="price"><span>$${Number(p.price).toFixed(2)}</span></p>
+					</div>
+					<div class="bottom-area d-flex px-3">
+						<div class="m-auto d-flex">
+							<a href="#" class="add-to-cart d-flex justify-content-center align-items-center text-center" data-id="${p.id}">
+								<span><i class="ion-ios-cart"></i></span>
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>`).join('');
+    
+	container.innerHTML = html;
 }
 
 // 5. SEARCH LOGIC (Real-time)
@@ -437,24 +436,36 @@ if (searchInput) {
 	});
 }
 
-// 6. CATEGORY FILTER LOGIC
-const categoryList = document.querySelector('.product-category');
-if (categoryList) {
-	categoryList.addEventListener('click', (e) => {
-		const link = e.target.closest('a');
-		if (!link) return;
-		e.preventDefault();
+/* --- THE LOGIC FLOW: CATEGORY FILTER --- */
+const categoryContainer = document.querySelector('.product-category');
+if (categoryContainer) {
+    const categoryLinks = categoryContainer.querySelectorAll('a');
+    categoryLinks.forEach(link => {
+        link.addEventListener('click', async (e) => {
+            e.preventDefault();
+            
+            // UI: Update active highlight
+            categoryLinks.forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
 
-		categoryList.querySelectorAll('a').forEach(a => a.classList.remove('active'));
-		link.classList.add('active');
+            // 1. TRIGGER: Get category from HTML data attribute[cite: 5]
+            const category = link.getAttribute('data-category');
 
-		const category = link.textContent.trim();
-		const filtered = (category === "All")
-			? allProducts
-			: allProducts.filter(p => p.category === category);
+            // 2. REQUEST: Send Envelope to Server
+            try {
+                const response = await fetch(`http://localhost:3000/api/products/filter?category=${category}`);
+                if (!response.ok) throw new Error("Gatekeeper rejected request");
 
-		renderUI(filtered);
-	});
+                // 4. RESPONSE: Receive the Package (JSON)
+                const filteredData = await response.json();
+                
+                // 4. UPDATE UI: Call the renderer with the new data[cite: 3]
+                renderUI(filteredData); 
+            } catch (error) {
+                console.error("Filter error:", error);
+            }
+        });
+    });
 }
 
 // 7. CART ACTIONS (Add & Delete)[cite: 3, 4]
