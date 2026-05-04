@@ -1,0 +1,62 @@
+[
+    {
+        "username": "alice.smith@example.com",
+        "password_hash": "5f4dcc3b5aa765d61d8327deb882cf99",
+        "first_name": "Alice",
+        "reg_date": "2026-01-15"
+    },
+    {
+        "username": "bob.jones@example.com",
+        "password_hash": "7c6a1e4f3247d84f01010304416384d6",
+        "first_name": "Bob",
+        "reg_date": "2026-01-20"
+    },
+    {
+        "username": "charlie.brown@example.com",
+        "password_hash": "6cb692044b618094bb95106a3658d56a",
+        "first_name": "Charlie",
+        "reg_date": "2026-02-05"
+    },
+    {
+        "username": "dana.white@example.com",
+        "password_hash": "81dc9bdb52d04dc20036dbd8313ed055",
+        "first_name": "Dana",
+        "reg_date": "2026-02-12"
+    },
+    {
+        "username": "evan.davis@example.com",
+        "password_hash": "1a1dc91c907325c69271ddf0c944bc72",
+        "first_name": "Evan",
+        "reg_date": "2026-02-28"
+    },
+    {
+        "username": "fiona.glen@example.com",
+        "password_hash": "d1093155891396a583344d564348574d",
+        "first_name": "Fiona",
+        "reg_date": "2026-03-01"
+    },
+    {
+        "username": "george.king@example.com",
+        "password_hash": "202cb962ac59075b964b07152d234b70",
+        "first_name": "George",
+        "reg_date": "2026-03-10"
+    },
+    {
+        "username": "hannah.lee@example.com",
+        "password_hash": "250cf8b51c773f3f8dc8b4be867a9a02",
+        "first_name": "Hannah",
+        "reg_date": "2026-03-15"
+    },
+    {
+        "username": "ian.wright@example.com",
+        "password_hash": "68053033bb72f00f0469b329432f80f6",
+        "first_name": "Ian",
+        "reg_date": "2026-03-22"
+    },
+    {
+        "username": "jenny.lin@example.com",
+        "password_hash": "9e107d9d372bb6826bd81d3542a419d6",
+        "first_name": "Jenny",
+        "reg_date": "2026-04-01"
+    }
+]

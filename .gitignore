@@ -141,3 +141,15 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# .gitignore
+node_modules
+.env
+
+# SQLite Database
+database.db
+database.db-journal
+
+# OS generated files
+.DS_Store
+Thumbs.db

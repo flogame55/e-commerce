@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Vegefoods - Login</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link href="https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700,700i&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Amatic+SC:400,700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/open-iconic-bootstrap.min.css">
+    <link rel="stylesheet" href="css/animate.css">
+
+    <link rel="stylesheet" href="css/owl.carousel.min.css">
+    <link rel="stylesheet" href="css/owl.theme.default.min.css">
+    <link rel="stylesheet" href="css/magnific-popup.css">
+
+    <link rel="stylesheet" href="css/aos.css">
+
+    <link rel="stylesheet" href="css/ionicons.min.css">
+
+    <link rel="stylesheet" href="css/bootstrap-datepicker.css">
+    <link rel="stylesheet" href="css/jquery.timepicker.css">
+
+
+    <link rel="stylesheet" href="css/flaticon.css">
+    <link rel="stylesheet" href="css/icomoon.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="goto-here">
+    <div class="py-1 bg-primary">
+        <div class="container">
+            <div class="row no-gutters d-flex align-items-start align-items-center px-md-0">
+                <div class="col-lg-12 d-block">
+                    <div class="row d-flex">
+                        <div class="col-md pr-4 d-flex topper align-items-center">
+                            <div class="icon mr-2 d-flex justify-content-center align-items-center"><span
+                                    class="icon-phone2"></span></div>
+                            <span class="text">+ 1235 2355 98</span>
+                        </div>
+                        <div class="col-md pr-4 d-flex topper align-items-center">
+                            <div class="icon mr-2 d-flex justify-content-center align-items-center"><span
+                                    class="icon-paper-plane"></span></div>
+                            <span class="text">youremail@email.com</span>
+                        </div>
+                        <div class="col-md-5 pr-4 d-flex topper align-items-center text-lg-right">
+                            <span class="text">3-5 Business days delivery &amp; Free Returns</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation (Updated with Login)[cite: 2] -->
+    <nav class="navbar navbar-expand-lg navbar-dark ftco_navbar bg-dark ftco-navbar-light" id="ftco-navbar">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">Vegefoods</a>
+            <div class="collapse navbar-collapse" id="ftco-nav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
+                    <li class="nav-item"><a href="shop.html" class="nav-link">Shop</a></li>
+                    <li class="nav-item active"><a href="login.html" class="nav-link">Login</a></li>
+                    <li class="nav-item"><a href="register.html" class="nav-link">Register</a></li>
+                    <li class="nav-item cta cta-colored"><a href="cart.html" class="nav-link"><span
+                                class="icon-shopping_cart"></span></a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Breadcrumb Header -->
+    <div class="hero-wrap hero-bread" style="background-image: url('images/bg_1.jpg');">
+        <div class="container">
+            <div class="row no-gutters slider-text align-items-center justify-content-center">
+                <div class="col-md-9 ftco-animate text-center">
+                    <p class="breadcrumbs"><span class="mr-2"><a href="index.html">Home</a></span> <span>Login</span>
+                    </p>
+                    <h1 class="mb-0 bread">Login</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Form Section -->
+    <section class="ftco-section contact-section bg-light">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-6 order-md-last d-flex">
+                    <form id="loginForm" class="bg-white p-5 contact-form">
+                        <div class="form-group">
+                            <input type="email" id="email" class="form-control" placeholder="Your Email" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" id="password" class="form-control" placeholder="Password" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="submit" value="Login" class="btn btn-primary py-3 px-5 w-100">
+                        </div>
+                        <div class="text-center">
+                            <p>Don't have an account? <a href="register.html">Register here</a></p>
+                        </div>
+                        <div id="message" class="mt-3 text-center"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer[cite: 2] -->
+    <footer class="ftco-footer ftco-section">
+        <div class="container">
+            <div class="row mb-5">
+                <div class="col-md text-center">
+                    <h2 class="ftco-heading-2">Vegefoods</h2>
+                    <p>Architecture of Trust - Secure E-commerce Platform</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts for Handshake Logic -->
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const messageDiv = document.getElementById('message');
+
+            try {
+                // Layer 1: POST Request to our Node.js API
+                const response = await fetch('http://localhost:3000/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Success: Persistence & Continuity Logic
+                    localStorage.setItem('token', data.token); // The Keycard
+                    localStorage.setItem('user', JSON.stringify(data.user)); // User Info
+
+                    messageDiv.innerHTML = `<span class="text-success">Login Successful! Redirecting...</span>`;
+                    setTimeout(() => { window.location.href = 'index.html'; }, 1500);
+                } else {
+                    // Security Logic: Generic Error Message[cite: 1]
+                    messageDiv.innerHTML = `<span class="text-danger">${data.message}</span>`;
+                }
+            } catch (error) {
+                messageDiv.innerHTML = `<span class="text-danger">Error: Connection to server failed.</span>`;
+            }
+        });
+    </script>
+</body>
+
+</html>
