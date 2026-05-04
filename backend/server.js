@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const sqlite3 = require('sqlite3').verbose();
 const productRoutes = require('./routes/products');
+const fs = require('fs');
 
 const app = express();
 const PORT = 3000;
@@ -19,6 +20,7 @@ if (!JWT_SECRET) {
 
 // --- 2. DATABASE CONFIGURATION ---
 const dbPath = path.join(__dirname, 'database.db');
+const authFile = path.join(__dirname, 'data/auth_user.json');
 const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
         console.error("Database connection failed:", err.message);
@@ -82,100 +84,84 @@ app.get('/api/products/filter', gatekeeper, (req, res) => {
 });
 
 
-// --- 5. AUTHENTICATION ROUTE ---
-app.post('/api/login', (req, res) => {
-    // A. Capture the data from the Request Body (The Envelope)
-    const { email, password } = req.body;
+// --- 5. AUTHENTICATION ROUTES (JSON-ONLY VERSION) ---
 
-    // B. Validation: Stop early if data is missing
-    if (!email || !password) {
-        return res.status(400).json({ message: "Email and password are required" });
-    }
-
-    // C. Define the Query inside the route
-    const query = `SELECT * FROM users WHERE email = ?`;
-
-    // D. Database Execution
-    db.get(query, [email], async (err, user) => {
-        if (err) {
-            console.error("DB QUERY ERROR:", err.message); // Visible in Terminal
-            return res.status(500).json({ message: "Database error" });
-        }
-
-        // E. Security: Check if user exists[cite: 4]
-        if (!user) {
-            return res.status(401).json({ status: "Fail", message: "Invalid email or password" });
-        }
-
-        try {
-            // F. Compare the input password with the Bcrypt hash in DB[cite: 4]
-            const isMatch = await bcrypt.compare(password, user.password_hash);
-
-            if (isMatch) {
-                // G. Success: Sign the JWT Token (The Passport)[cite: 4]
-                const payload = { user_id: user.id, email: user.email };
-                const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
-
-                return res.status(200).json({
-                    status: "Success",
-                    token: token,
-                    user: {
-                        first_name: user.first_name,
-                        email: user.email
-                    }
-                });
-            } else {
-                // Password didn't match
-                return res.status(401).json({ status: "Fail", message: "Invalid email or password" });
-            }
-        } catch (bcryptErr) {
-            console.error("BCRYPT COMPARE ERROR:", bcryptErr); // Visible in Terminal
-            return res.status(500).json({ message: "Error processing login comparison" });
-        }
-    });
-});
-
-/**
- * @route   POST /api/register
- * @desc    Create a new user with a hashed password
- * @access  Public
- */
+// A. Registration Logic
 app.post('/api/register', async (req, res) => {
     const { first_name, email, password } = req.body;
 
-    // 1. Validation: Ensure no empty envelopes reach the DB
+    // logic: Validation (Minimum requirements from homework)
     if (!first_name || !email || !password) {
         return res.status(400).json({ message: "All fields are required" });
     }
 
     try {
-        // 2. Layer 2 Defense: Hashing the password[cite: 1, 4]
-        // We use a salt round of 10 to balance security and performance
+        // Read current JSON
+        const data = fs.readFileSync(authFile, 'utf8');
+        const users = JSON.parse(data);
+
+        // Check if username already exists
+        const exists = users.find(u => u.username === email);
+        if (exists) {
+            return res.status(400).json({ message: "User already exists in JSON!" });
+        }
+
+        // Hash password before storing (Best Practice)
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // 3. Database Logic: Inserting the new identity[cite: 1, 4]
-        const sql = `INSERT INTO users (first_name, email, password_hash) VALUES (?, ?, ?)`;
+        // Create new user object[cite: 5]
+        const newUser = {
+            username: email,
+            password_hash: hashedPassword,
+            first_name: first_name,
+            reg_date: new Date().toISOString().split('T')[0]
+        };
 
-        db.run(sql, [first_name, email, hashedPassword], function (err) {
-            if (err) {
-                // Handle "409 Conflict" if the email already exists
-                if (err.message.includes("UNIQUE constraint failed")) {
-                    return res.status(409).json({ message: "Email already registered" });
-                }
-                console.error("Registration Error:", err.message);
-                return res.status(500).json({ message: "Internal server error" });
-            }
+        // Save back to JSON[cite: 5]
+        users.push(newUser);
+        fs.writeFileSync(authFile, JSON.stringify(users, null, 4));
 
-            // 4. Success Response[cite: 1, 4]
-            res.status(201).json({
+        res.status(201).json({ status: "Success", message: "User registered in auth_user.json" });
+    } catch (err) {
+        console.error("Registration Error:", err);
+        res.status(500).json({ message: "Failed to save to JSON file" });
+    }
+});
+
+// B. Login Logic
+app.post('/api/login', async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        // Read JSON Source of Truth[cite: 5]
+        const data = fs.readFileSync(authFile, 'utf8');
+        const users = JSON.parse(data);
+
+        // Find user by username (email)[cite: 5]
+        const user = users.find(u => u.username === email);
+
+        if (!user) {
+            return res.status(401).json({ message: "Invalid email or password" });
+        }
+
+        // Compare provided password with hashed password in JSON[cite: 1, 4]
+        const isMatch = await bcrypt.compare(password, user.password_hash);
+
+        if (isMatch) {
+            // Issue JWT Passport[cite: 1, 3]
+            const token = jwt.sign({ email: user.username }, JWT_SECRET, { expiresIn: '1h' });
+
+            return res.status(200).json({
                 status: "Success",
-                message: "User registered successfully",
-                user_id: this.lastID
+                token: token,
+                user: { first_name: user.first_name, email: user.username }
             });
-        });
-    } catch (error) {
-        console.error("Bcrypt Hashing Error:", error);
-        res.status(500).json({ message: "Error securing password" });
+        } else {
+            return res.status(401).json({ message: "Invalid email or password" });
+        }
+    } catch (err) {
+        console.error("Login Error:", err);
+        res.status(500).json({ message: "Server Error" });
     }
 });
 
