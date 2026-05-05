@@ -357,54 +357,83 @@ let cart = JSON.parse(localStorage.getItem('cart')) || []; // Persistent Cart
 // 2. INITIALIZATION ON PAGE LOAD
 document.addEventListener('DOMContentLoaded', () => {
 	requestProducts();
-    updateCartUI();
+	updateCartUI();
+	if (document.querySelector('.cart-list')) {
+		renderCartTable();
+	}
+	if (document.querySelector('.billing-form')) {
+		renderCheckoutSummary();
+	}
 });
 
 // 3. BACKEND COMMUNICATION
 async function requestProducts() {
-    try {
-        const response = await fetch('http://localhost:3000/api/products');
-        allProducts = await response.json();
-        renderUI(allProducts);
-    } catch (error) {
-        console.error("Load error:", error);
-    }
+	try {
+		const response = await fetch('http://localhost:3000/api/products');
+		allProducts = await response.json();
+		renderUI(allProducts);
+	} catch (error) {
+		console.error("Load error:", error);
+	}
 }
 
-/* --- THE UI RENDERER (The part that updates your screen) --- */
+/* --- HELPER: Logic for Inventory Visual Cues --- */
+function getStockColor(quantity) {
+	if (quantity === 0) return 'text-muted'; // Gray for empty
+	if (quantity < 5) return 'text-danger';  // Red for < 5
+	if (quantity < 15) return 'text-warning'; // Yellow/Orange for < 15
+	return 'text-success'; // Normal green for plenty of stock
+}
+
+/* --- THE UI RENDERER (Updated with UX/UI Color Logic) --- */
 function renderUI(products) {
-    const container = document.querySelector('#product-container');
-    if (!container) return;
+	const container = document.querySelector('#product-container');
+	if (!container) return;
 
-    // CRITICAL FIX: Clear the old products before showing new ones
-    container.innerHTML = ''; 
+	container.innerHTML = '';
 
-    if (products.length === 0) {
-        container.innerHTML = '<div class="col-12 text-center"><h3>No products found in this category.</h3></div>';
-        return;
-    }
+	if (products.length === 0) {
+		container.innerHTML = '<div class="col-12 text-center"><h3>No products found.</h3></div>';
+		return;
+	}
 
-	// Build the new grid without animation classes
-	const html = products.map(p => `
-		<div class="col-md-6 col-lg-3">
-			<div class="product">
-				<a href="#" class="img-prod"><img class="img-fluid" src="${p.image}" alt="${p.name}"></a>
-				<div class="text py-3 pb-4 px-3 text-center">
-					<h3><a href="#">${p.name}</a></h3>
-					<div class="pricing">
-						<p class="price"><span>$${Number(p.price).toFixed(2)}</span></p>
-					</div>
-					<div class="bottom-area d-flex px-3">
-						<div class="m-auto d-flex">
-							<a href="#" class="add-to-cart d-flex justify-content-center align-items-center text-center" data-id="${p.id}">
-								<span><i class="ion-ios-cart"></i></span>
-							</a>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>`).join('');
-    
+	const html = products.map(p => {
+		// Determine the Bootstrap color class based on our new logic[cite: 5]
+		const stockClass = getStockColor(p.quantity);
+		const stockText = p.quantity === 0 ? "Out of Stock" : `Stock: ${p.quantity} left`;
+
+		return `
+            <div class="col-md-6 col-lg-3">
+                <div class="product">
+                    <a href="#" class="img-prod">
+                        <img class="img-fluid" src="${p.image}" alt="${p.name}">
+                    </a>
+                    <div class="text py-3 pb-4 px-3 text-center">
+                        <h3><a href="#">${p.name}</a></h3>
+                        <div class="pricing">
+                            <p class="price"><span>$${Number(p.price).toFixed(2)}</span></p>
+                        </div>
+                        
+                        <!-- UPDATED UX/UI: Inventory Info with dynamic colors -->
+                        <div class="inventory-info mb-3">
+                            <span class="${stockClass}" style="font-weight: bold;">
+                                ${stockText}
+                            </span>
+                        </div>
+
+                        <div class="bottom-area d-flex px-3">
+                            <div class="m-auto d-flex">
+                                <!-- Disable button if out of stock for better UX -->
+                                <a href="#" class="add-to-cart d-flex justify-content-center align-items-center text-center ${p.quantity === 0 ? 'disabled' : ''}" data-id="${p.id}">
+                                    <span><i class="ion-ios-cart"></i></span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+	}).join('');
+
 	container.innerHTML = html;
 }
 
@@ -439,33 +468,33 @@ if (searchInput) {
 /* --- THE LOGIC FLOW: CATEGORY FILTER --- */
 const categoryContainer = document.querySelector('.product-category');
 if (categoryContainer) {
-    const categoryLinks = categoryContainer.querySelectorAll('a');
-    categoryLinks.forEach(link => {
-        link.addEventListener('click', async (e) => {
-            e.preventDefault();
-            
-            // UI: Update active highlight
-            categoryLinks.forEach(l => l.classList.remove('active'));
-            link.classList.add('active');
+	const categoryLinks = categoryContainer.querySelectorAll('a');
+	categoryLinks.forEach(link => {
+		link.addEventListener('click', async (e) => {
+			e.preventDefault();
 
-            // 1. TRIGGER: Get category from HTML data attribute[cite: 5]
-            const category = link.getAttribute('data-category');
+			// UI: Update active highlight
+			categoryLinks.forEach(l => l.classList.remove('active'));
+			link.classList.add('active');
 
-            // 2. REQUEST: Send Envelope to Server
-            try {
-                const response = await fetch(`http://localhost:3000/api/products/filter?category=${category}`);
-                if (!response.ok) throw new Error("Gatekeeper rejected request");
+			// 1. TRIGGER: Get category from HTML data attribute[cite: 5]
+			const category = link.getAttribute('data-category');
 
-                // 4. RESPONSE: Receive the Package (JSON)
-                const filteredData = await response.json();
-                
-                // 4. UPDATE UI: Call the renderer with the new data[cite: 3]
-                renderUI(filteredData); 
-            } catch (error) {
-                console.error("Filter error:", error);
-            }
-        });
-    });
+			// 2. REQUEST: Send Envelope to Server
+			try {
+				const response = await fetch(`http://localhost:3000/api/products/filter?category=${category}`);
+				if (!response.ok) throw new Error("Gatekeeper rejected request");
+
+				// 4. RESPONSE: Receive the Package (JSON)
+				const filteredData = await response.json();
+
+				// 4. UPDATE UI: Call the renderer with the new data[cite: 3]
+				renderUI(filteredData);
+			} catch (error) {
+				console.error("Filter error:", error);
+			}
+		});
+	});
 }
 
 // 7. CART ACTIONS (Add & Delete)[cite: 3, 4]
@@ -514,6 +543,7 @@ function renderCartTable() {
 
 	if (cart.length === 0) {
 		tableBody.innerHTML = '<tr><td colspan="6" class="text-center">Your cart is empty</td></tr>';
+		updateCartTotals();
 		return;
 	}
 
@@ -527,10 +557,14 @@ function renderCartTable() {
             <td class="image-prod"><div class="img" style="background-image:url(${item.image});"></div></td>
             <td class="product-name"><h3>${item.name}</h3></td>
             <td class="price">$${item.price.toFixed(2)}</td>
-            <td class="quantity">${item.quantity}</td>
+            <td class="quantity">
+                <input type="number" class="form-control cart-quantity-input" data-id="${item.id}" value="${item.quantity}" min="1" style="width: 80px; margin: 0 auto; text-align: center;">
+            </td>
             <td class="total">$${(item.price * item.quantity).toFixed(2)}</td>
         </tr>
     `).join('');
+
+	if (typeof updateCartTotals === 'function') updateCartTotals();
 }
 
 // Delegation for Delete from Cart (Cart Page)
@@ -544,6 +578,30 @@ if (cartTable) {
 			deleteItem(id);
 		}
 	});
+
+	cartTable.addEventListener('change', (e) => {
+		if (e.target.classList.contains('cart-quantity-input')) {
+			const id = Number(e.target.getAttribute('data-id'));
+			const newQuantity = Number(e.target.value);
+
+			if (newQuantity > 0) {
+				const item = cart.find(i => i.id === id);
+				if (item) {
+					item.quantity = newQuantity;
+					saveAndSync();
+					renderCartTable(); // Refresh table immediately to update totals
+				}
+			} else {
+				e.target.value = 1; // Prevent zero or negative quantities
+				const item = cart.find(i => i.id === id);
+				if (item) {
+					item.quantity = 1;
+					saveAndSync();
+					renderCartTable();
+				}
+			}
+		}
+	});
 }
 
 // 9. NAVBAR UI UPDATE
@@ -553,6 +611,76 @@ function updateCartUI() {
 	if (badge && badge.parentElement) {
 		badge.parentElement.innerHTML = `<span class="icon-shopping_cart"></span>[${totalCount}]`;
 	}
+}
+
+// 9.5 CART PAGE TOTALS UPDATE (cart.html)
+function updateCartTotals() {
+	const subtotalEl = document.getElementById('cart-subtotal');
+	const deliveryEl = document.getElementById('cart-delivery');
+	const taxEl = document.getElementById('cart-discount'); // Repurposing discount span for tax
+	const totalEl = document.getElementById('cart-final-total');
+
+	if (!subtotalEl) return;
+
+	let subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+	let delivery = subtotal > 0 ? 5.00 : 0.00;
+	let tax = subtotal * 0.08;
+	let total = subtotal + delivery + tax;
+
+	subtotalEl.innerText = `$${subtotal.toFixed(2)}`;
+	if (deliveryEl) deliveryEl.innerText = `$${delivery.toFixed(2)}`;
+	
+	if (taxEl) {
+		const label = taxEl.previousElementSibling;
+		if (label) label.innerText = 'Tax (8%)';
+		taxEl.innerText = `$${tax.toFixed(2)}`;
+	}
+
+	if (totalEl) totalEl.innerText = `$${total.toFixed(2)}`;
+}
+
+// 10. CHECKOUT SUMMARY RENDERER (checkout.html)
+function renderCheckoutSummary() {
+	const checkoutContainer = document.querySelector('.cart-detail.cart-total');
+	if (!checkoutContainer) return; // Exit if not on checkout.html
+
+	let subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+	let delivery = subtotal > 0 ? 5.00 : 0.00; // Mock delivery fee
+	let tax = subtotal * 0.08; // Mock tax (8%)
+	let total = subtotal + delivery + tax;
+
+	let productListHTML = cart.length > 0 ? cart.map(item => `
+        <p class="d-flex">
+            <span>${item.name} <span style="color: #999;">(x${item.quantity})</span></span>
+            <span>$${(item.price * item.quantity).toFixed(2)}</span>
+        </p>
+    `).join('') : '<p class="text-center">Your cart is empty.</p>';
+
+	checkoutContainer.innerHTML = `
+        <h3 class="billing-heading mb-4">Cart Total</h3>
+		<div class="product-list mb-4">
+			<h4 class="mb-3" style="font-size: 18px;">Product List</h4>
+			${productListHTML}
+		</div>
+		<hr>
+        <p class="d-flex">
+            <span>Subtotal</span>
+            <span>$${subtotal.toFixed(2)}</span>
+        </p>
+        <p class="d-flex">
+            <span>Delivery</span>
+            <span>$${delivery.toFixed(2)}</span>
+        </p>
+        <p class="d-flex">
+            <span>Tax (8%)</span>
+            <span>$${tax.toFixed(2)}</span>
+        </p>
+        <hr>
+        <p class="d-flex total-price">
+            <span>Total</span>
+            <span>$${total.toFixed(2)}</span>
+        </p>
+    `;
 }
 
 

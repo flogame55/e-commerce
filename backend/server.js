@@ -165,6 +165,96 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+/**
+ * @route   POST /api/checkout
+ * @desc    Atomic Transaction: Validate cart, email, and payment before saving order
+ */
+app.post('/api/checkout', async (req, res) => {
+    // Phase 2: The Middleware Buffer (express.json) has unpacked the payload
+    const { email, cartItems, cardNumber } = req.body;
+    let errors = [];
+
+    try {
+        // --- 1. VALIDATION: SERVER-SIDE SURVIVAL ---
+
+        // A. Inventory/Cart Check
+        if (!cartItems || !Array.isArray(cartItems) || cartItems.length === 0) {
+            errors.push("Your cart is empty.");
+        }
+
+        // B. Email Validation (RegEx Firewall)
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            errors.push("Invalid email format.");
+        }
+
+        // C. Payment Validation (16-digit Mock)[cite: 2]
+        const ccRegex = /^\d{16}$/;
+        if (!ccRegex.test(cardNumber)) {
+            errors.push("Credit card must be exactly 16 digits.");
+        }
+
+        // If any validation failed, stop here[cite: 2]
+        if (errors.length > 0) {
+            return res.status(400).json({ status: "Fail", message: errors.join(" ") });
+        }
+
+        // --- 2. CALCULATIONS: PROFIT PROTECTION[cite: 2] ---
+        // Re-calculate on server to prevent price tampering in the browser[cite: 2]
+        const getProductPrice = (productId) => {
+            return new Promise((resolve, reject) => {
+                db.get("SELECT price FROM products WHERE id = ?", [productId], (err, row) => {
+                    if (err) reject(err);
+                    else resolve(row ? row.price : null);
+                });
+            });
+        };
+
+        let totalAmount = 0;
+        for (const item of cartItems) {
+            const truePrice = await getProductPrice(item.id);
+            if (truePrice === null) {
+                return res.status(400).json({ status: "Fail", message: `Product with ID ${item.id} not found.` });
+            }
+            totalAmount += truePrice * item.quantity;
+        }
+
+        // --- 3. PERSISTENCE: THE ATOMIC SAVE[cite: 2] ---
+        const orderId = `ORD-${Date.now()}`;
+        const orderDate = new Date().toISOString();
+
+        // SQL Transaction logic
+        db.serialize(() => {
+            db.run("BEGIN TRANSACTION");
+
+            const sql = `INSERT INTO orders (order_id, user_email, total_price, order_date) 
+                         VALUES (?, ?, ?, ?)`;
+
+            db.run(sql, [orderId, email, totalAmount, orderDate], function (err) {
+                if (err) {
+                    db.run("ROLLBACK");
+                    return res.status(400).json({ message: "Save Order step failed. Cart preserved." });
+                }
+
+                // If DB save is successful, we commit[cite: 2]
+                db.run("COMMIT");
+
+                // Success Handshake[cite: 2]
+                res.status(201).json({
+                    status: "Success",
+                    message: "Order placed successfully!",
+                    orderId: orderId
+                });
+            });
+        });
+
+    } catch (error) {
+        // --- SYSTEM GRACEFUL FAILURE[cite: 2] ---
+        console.error("Critical System Error:", error);
+        res.status(400).json({ message: "Server encountered an error. Please try again." });
+    }
+});
+
 
 
 // --- 6. REMAINING ROUTES ---
