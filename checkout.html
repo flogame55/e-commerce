@@ -314,10 +314,18 @@
 	<script>
 		// Function to handle the final checkout click
 		async function processCheckout() {
+			const userId = localStorage.getItem('userId');
+			
+			if (!userId) {
+				alert("Error: You must be logged in to place an order.");
+				window.location.href = "login.html";
+				return;
+			}
+
 			const orderData = {
-				email: document.getElementById('email').value,
-				cardNumber: document.getElementById('card-number').value, // 16 digits
-				cartItems: cart // From your global cart state[cite: 3]
+				user_id: userId,
+				cardNumber: document.getElementById('card-number').value, // kept for simulation, ignored by backend
+				cartItems: cart // From your global cart state
 			};
 
 			try {

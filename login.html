@@ -146,6 +146,7 @@
                     // Success: Persistence & Continuity Logic
                     localStorage.setItem('token', data.token); // The Keycard
                     localStorage.setItem('user', JSON.stringify(data.user)); // User Info
+                    localStorage.setItem('userId', data.user.id); // Primary link for orders
 
                     messageDiv.innerHTML = `<span class="text-success">Login Successful! Redirecting...</span>`;
                     setTimeout(() => { window.location.href = 'index.html'; }, 1500);

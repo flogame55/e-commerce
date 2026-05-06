@@ -364,7 +364,43 @@ document.addEventListener('DOMContentLoaded', () => {
 	if (document.querySelector('.billing-form')) {
 		renderCheckoutSummary();
 	}
+	updateAuthNav();
 });
+
+function updateAuthNav() {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+        try {
+            const user = JSON.parse(userStr);
+            const loginLink = document.querySelector('.navbar-nav a[href="login.html"]');
+            
+            if (loginLink) {
+                // Change 'Login' to user's name
+                loginLink.innerText = `Hi, ${user.first_name}`;
+                loginLink.href = "#"; 
+                
+                // Add a simple logout mechanism
+                loginLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (confirm("Would you like to log out?")) {
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('user');
+                        localStorage.removeItem('userId');
+                        window.location.reload();
+                    }
+                });
+            }
+            
+            // Hide the 'Register' link if logged in
+            const registerLink = document.querySelector('.navbar-nav a[href="register.html"]');
+            if (registerLink) {
+                registerLink.parentElement.style.display = 'none';
+            }
+        } catch (e) {
+            console.error("Auth Nav Error:", e);
+        }
+    }
+}
 
 // 3. BACKEND COMMUNICATION
 async function requestProducts() {
