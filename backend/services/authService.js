@@ -71,7 +71,25 @@ const loginUser = async (email, password) => {
     }
 };
 
+const verifyUser = async (id) => {
+    try {
+        const user = await userRepository.findUserById(id);
+        if (!user) {
+            const error = new Error("User not found");
+            error.statusCode = 404;
+            throw error;
+        }
+        return user;
+    } catch(err) {
+        if(err.statusCode) throw err;
+        const error = new Error("Server Error");
+        error.statusCode = 500;
+        throw error;
+    }
+};
+
 module.exports = {
     registerUser,
-    loginUser
+    loginUser,
+    verifyUser
 };

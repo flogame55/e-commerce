@@ -19,4 +19,13 @@ const filterProducts = async (req, res, next) => {
     }
 };
 
-module.exports = { getAllProducts, filterProducts };
+const getProductById = async (req, res, next) => {
+    try {
+        const product = await productService.getProductById(req.params.id);
+        res.status(200).json(product);
+    } catch (error) {
+        next(error);
+    }
+};
+
+module.exports = { getAllProducts, filterProducts, getProductById };

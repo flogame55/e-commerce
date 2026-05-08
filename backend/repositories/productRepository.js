@@ -59,7 +59,7 @@ const deleteProduct = (id) => {
 
 const updateProductStock = (productId, quantityToDeduct) => {
     return new Promise((resolve, reject) => {
-        db.run("UPDATE products SET quantity = quantity - ? WHERE id = ?", [quantityToDeduct, productId], function(err) {
+        db.run("UPDATE products SET stock = stock - ? WHERE id = ?", [quantityToDeduct, productId], function(err) {
             if (err) reject(err);
             else resolve();
         });

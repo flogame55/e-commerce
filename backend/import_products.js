@@ -11,24 +11,26 @@ const products = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
 const db = new sqlite3.Database(dbPath);
 
 db.serialize(() => {
-  db.run('DROP TABLE IF EXISTS products');
-  db.run(`CREATE TABLE products (
-    id INTEGER PRIMARY KEY,
-    name TEXT,
-    price REAL,
-    image TEXT,
-    category TEXT
-  )`);
+  // We use INSERT OR REPLACE to update existing products or insert new ones
+  const stmt = db.prepare('INSERT OR REPLACE INTO products (id, name, price, stock, category, image_url) VALUES (?, ?, ?, ?, ?, ?)');
+  
+  let fruitCount = 0;
+  let totalCount = 0;
 
-  const stmt = db.prepare('INSERT INTO products (id, name, price, image, category) VALUES (?, ?, ?, ?, ?)');
+  // The user asked to "get fruit infomation to datbase from product.json".
+  // We'll insert all produce but count them.
   for (const p of products) {
-    stmt.run(p.id, p.name, p.price, p.image, p.category);
+    // Mapping: p.image -> image_url, p.quantity -> stock
+    stmt.run(p.id, p.name, p.price, p.quantity || 0, p.category, p.image);
+    totalCount++;
+    if (p.category === 'Fruits') fruitCount++;
   }
   stmt.finalize();
 
   db.all('SELECT COUNT(*) as count FROM products', (err, rows) => {
     if (err) throw err;
-    console.log('Inserted products:', rows[0].count);
+    console.log(`Inserted/Updated ${totalCount} products in total (including ${fruitCount} fruits).`);
+    console.log(`Total records in 'products' table: ${rows[0].count}`);
     db.close();
   });
 });

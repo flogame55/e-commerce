@@ -368,38 +368,38 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function updateAuthNav() {
-    const userStr = localStorage.getItem('user');
-    if (userStr) {
-        try {
-            const user = JSON.parse(userStr);
-            const loginLink = document.querySelector('.navbar-nav a[href="login.html"]');
-            
-            if (loginLink) {
-                // Change 'Login' to user's name
-                loginLink.innerText = `Hi, ${user.first_name}`;
-                loginLink.href = "#"; 
-                
-                // Add a simple logout mechanism
-                loginLink.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    if (confirm("Would you like to log out?")) {
-                        localStorage.removeItem('token');
-                        localStorage.removeItem('user');
-                        localStorage.removeItem('userId');
-                        window.location.reload();
-                    }
-                });
-            }
-            
-            // Hide the 'Register' link if logged in
-            const registerLink = document.querySelector('.navbar-nav a[href="register.html"]');
-            if (registerLink) {
-                registerLink.parentElement.style.display = 'none';
-            }
-        } catch (e) {
-            console.error("Auth Nav Error:", e);
-        }
-    }
+	const userStr = localStorage.getItem('user');
+	if (userStr) {
+		try {
+			const user = JSON.parse(userStr);
+			const loginLink = document.querySelector('.navbar-nav a[href="login.html"]');
+
+			if (loginLink) {
+				// Change 'Login' to user's name
+				loginLink.innerText = `Hi, ${user.first_name}`;
+				loginLink.href = "#";
+
+				// Add a simple logout mechanism
+				loginLink.addEventListener('click', (e) => {
+					e.preventDefault();
+					if (confirm("Would you like to log out?")) {
+						localStorage.removeItem('token');
+						localStorage.removeItem('user');
+						localStorage.removeItem('userId');
+						window.location.reload();
+					}
+				});
+			}
+
+			// Hide the 'Register' link if logged in
+			const registerLink = document.querySelector('.navbar-nav a[href="register.html"]');
+			if (registerLink) {
+				registerLink.parentElement.style.display = 'none';
+			}
+		} catch (e) {
+			console.error("Auth Nav Error:", e);
+		}
+	}
 }
 
 // 3. BACKEND COMMUNICATION
@@ -435,14 +435,15 @@ function renderUI(products) {
 
 	const html = products.map(p => {
 		// Determine the Bootstrap color class based on our new logic[cite: 5]
-		const stockClass = getStockColor(p.quantity);
-		const stockText = p.quantity === 0 ? "Out of Stock" : `Stock: ${p.quantity} left`;
+		const stockVal = p.stock !== undefined ? p.stock : p.quantity;
+		const stockClass = getStockColor(stockVal);
+		const stockText = stockVal === 0 ? "Out of Stock" : `Stock: ${stockVal} left`;
 
 		return `
             <div class="col-md-6 col-lg-3">
                 <div class="product">
                     <a href="#" class="img-prod">
-                        <img class="img-fluid" src="${p.image}" alt="${p.name}">
+                        <img class="img-fluid" src="${p.image_url || p.image}" alt="${p.name}">
                     </a>
                     <div class="text py-3 pb-4 px-3 text-center">
                         <h3><a href="#">${p.name}</a></h3>
@@ -460,7 +461,7 @@ function renderUI(products) {
                         <div class="bottom-area d-flex px-3">
                             <div class="m-auto d-flex">
                                 <!-- Disable button if out of stock for better UX -->
-                                <a href="#" class="add-to-cart d-flex justify-content-center align-items-center text-center ${p.quantity === 0 ? 'disabled' : ''}" data-id="${p.id}">
+                                <a href="#" class="add-to-cart d-flex justify-content-center align-items-center text-center ${stockVal === 0 ? 'disabled' : ''}" data-id="${p.id}">
                                     <span><i class="ion-ios-cart"></i></span>
                                 </a>
                             </div>
@@ -590,7 +591,7 @@ function renderCartTable() {
                     <span class="ion-ios-close"></span>
                 </a>
             </td>
-            <td class="image-prod"><div class="img" style="background-image:url(${item.image});"></div></td>
+            <td class="image-prod"><div class="img" style="background-image:url(${item.image_url || item.image});"></div></td>
             <td class="product-name"><h3>${item.name}</h3></td>
             <td class="price">$${item.price.toFixed(2)}</td>
             <td class="quantity">
@@ -665,7 +666,7 @@ function updateCartTotals() {
 
 	subtotalEl.innerText = `$${subtotal.toFixed(2)}`;
 	if (deliveryEl) deliveryEl.innerText = `$${delivery.toFixed(2)}`;
-	
+
 	if (taxEl) {
 		const label = taxEl.previousElementSibling;
 		if (label) label.innerText = 'Tax (8%)';
