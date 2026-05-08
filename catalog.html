@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Product Catalog</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/catalog.css">
+    <link rel="stylesheet" href="css/cart.css">
+</head>
+<body>
+
+    <!-- Main Content -->
+    <div class="catalog-container">
+        <header class="catalog-header">
+            <h1>Our Premium Products</h1>
+            <p>Discover the best items carefully selected for you.</p>
+            <button id="openCartBtn" style="padding: 10px 20px; border-radius: 5px; border: 1px solid #ccc; background: white; cursor: pointer;">
+                🛒 Open Cart
+            </button>
+        </header>
+
+        <div class="product-grid" id="productGrid">
+            <!-- Dynamic products will be injected here -->
+            <p>Loading products...</p>
+        </div>
+    </div>
+
+    <!-- Shopping Cart Sidebar -->
+    <div class="cart-overlay" id="cartOverlay"></div>
+    <aside class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h2>Your Cart</h2>
+            <button class="close-cart" id="closeCartBtn">&times;</button>
+        </div>
+        <div class="cart-items" id="cartItems">
+            <p style="text-align: center; color: #888;">Cart is currently empty.</p>
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Total</span>
+                <span id="cartTotalValue">$0.00</span>
+            </div>
+            <button class="checkout-btn">Proceed to Checkout</button>
+        </div>
+    </aside>
+
+    <script>
+        // --- API Integration ---
+        async function fetchProducts() {
+            try {
+                const response = await fetch('/api/products');
+                if (!response.ok) throw new Error("Failed to fetch products");
+                const products = await response.json();
+                renderProducts(products);
+            } catch (error) {
+                console.error(error);
+                document.getElementById('productGrid').innerHTML = '<p>Error loading products. Please try again later.</p>';
+            }
+        }
+
+        function renderProducts(products) {
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = ''; // clear loading state
+            
+            products.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    <img class="product-image" src="${product.image_url || 'images/placeholder.jpg'}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/280x200?text=No+Image'">
+                    <div class="product-info">
+                        <h3 class="product-title">${product.name}</h3>
+                        <div class="product-price">$${Number(product.price).toFixed(2)}</div>
+                        <button class="add-to-cart-btn" onclick="addToCart(${product.id})">Add to Cart</button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function addToCart(productId) {
+            alert(`Product ${productId} added to cart!`);
+            // Here you would integrate with your CartService/LocalStorage
+        }
+
+        // --- Cart Sidebar Toggle ---
+        const cartSidebar = document.getElementById('cartSidebar');
+        const cartOverlay = document.getElementById('cartOverlay');
+        const openCartBtn = document.getElementById('openCartBtn');
+        const closeCartBtn = document.getElementById('closeCartBtn');
+
+        function toggleCart() {
+            cartSidebar.classList.toggle('active');
+            cartOverlay.classList.toggle('active');
+        }
+
+        openCartBtn.addEventListener('click', toggleCart);
+        closeCartBtn.addEventListener('click', toggleCart);
+        cartOverlay.addEventListener('click', toggleCart);
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', fetchProducts);
+    </script>
+</body>
+</html>

@@ -1,12 +1,22 @@
 const productService = require('../services/productService');
 
-const getAllProducts = async (req, res) => {
+const getAllProducts = async (req, res, next) => {
     try {
         const products = await productService.getProductsFromStorage();
-        res.status(200).json(products); // Send data to shop.html[cite: 2]
+        res.status(200).json(products);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        next(error);
     }
 };
 
-module.exports = { getAllProducts };
+const filterProducts = async (req, res, next) => {
+    const category = req.query.category;
+    try {
+        const products = await productService.getFilteredProducts(category);
+        res.status(200).json(products);
+    } catch (error) {
+        next(error);
+    }
+};
+
+module.exports = { getAllProducts, filterProducts };
