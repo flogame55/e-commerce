@@ -1,6 +1,6 @@
-require('dotenv').config();
-const express = require('express');
 const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+const express = require('express');
 const cors = require('cors');
 
 // Import Database Configuration to establish connection on startup
@@ -13,7 +13,7 @@ const checkoutRoutes = require('./routes/checkout');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // --- 1. PRE-FLIGHT SECURITY CHECK ---
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -23,8 +23,15 @@ if (!JWT_SECRET) {
 }
 
 // --- 2. MIDDLEWARE ---
-app.use(cors());
-app.use(express.json());
+const corsOptions = {
+    origin: process.env.NODE_ENV === 'production'
+        ? process.env.ALLOWED_ORIGIN    // e.g., 'https://yourstore.com'
+        : '*',                           // allow everything in development
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+};
+app.use(cors(corsOptions));
+app.use(express.json({ limit: '10kb' }));
 app.use(express.static(path.join(__dirname, '../')));
 
 // --- 3. ROUTES ---

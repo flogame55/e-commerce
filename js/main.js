@@ -350,7 +350,7 @@ AOS.init({
    ========================================================================== */
 
 // 1. GLOBAL STATE[cite: 3, 4]
-const API_URL = 'http://localhost:3000/api/products';
+const API_URL = '/api/products';
 let allProducts = []; // Master list from Backend/Database
 let cart = JSON.parse(localStorage.getItem('cart')) || []; // Persistent Cart
 
@@ -405,7 +405,7 @@ function updateAuthNav() {
 // 3. BACKEND COMMUNICATION
 async function requestProducts() {
 	try {
-		const response = await fetch('http://localhost:3000/api/products');
+		const response = await fetch('/api/products');
 		allProducts = await response.json();
 		renderUI(allProducts);
 	} catch (error) {
@@ -519,7 +519,7 @@ if (categoryContainer) {
 
 			// 2. REQUEST: Send Envelope to Server
 			try {
-				const response = await fetch(`http://localhost:3000/api/products/filter?category=${category}`);
+				const response = await fetch(`/api/products/filter?category=${category}`);
 				if (!response.ok) throw new Error("Gatekeeper rejected request");
 
 				// 4. RESPONSE: Receive the Package (JSON)

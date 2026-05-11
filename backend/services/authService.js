@@ -15,6 +15,19 @@ const registerUser = async (firstName, email, password) => {
         throw error;
     }
 
+    // Input validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        const error = new Error("Invalid email format");
+        error.statusCode = 400;
+        throw error;
+    }
+    if (password.length < 8) {
+        const error = new Error("Password must be at least 8 characters");
+        error.statusCode = 400;
+        throw error;
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
     
     try {
@@ -42,20 +55,19 @@ const loginUser = async (email, password) => {
 
     try {
         const user = await userRepository.findUserByEmail(email);
-        if (!user) {
-            const error = new Error("User not found");
-            error.statusCode = 404;
-            throw error;
-        }
+        // Use the same bcrypt.compare flow for both cases to prevent timing attacks
+        const isMatch = user ? await bcrypt.compare(password, user.password_hash) : false;
 
-        const isMatch = await bcrypt.compare(password, user.password_hash);
-        if (!isMatch) {
-            const error = new Error("Invalid password");
+        // SECURITY: Same error message for wrong email AND wrong password
+        // Prevents user enumeration attacks (OWASP)
+        if (!user || !isMatch) {
+            const error = new Error("Invalid email or password");
             error.statusCode = 401;
             throw error;
         }
 
-        const token = jwt.sign({ email: user.email }, JWT_SECRET, { expiresIn: '1h' });
+        // Include user id in JWT payload for auth middleware
+        const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
         
         return {
             status: "Success",

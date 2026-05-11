@@ -28,4 +28,19 @@ const getProductById = async (req, res, next) => {
     }
 };
 
-module.exports = { getAllProducts, filterProducts, getProductById };
+const getProductsByIds = async (req, res, next) => {
+    try {
+        const { ids } = req.body;
+        if (!ids || !Array.isArray(ids)) {
+            const error = new Error("Invalid IDs format. Expected an array.");
+            error.statusCode = 400;
+            throw error;
+        }
+        const products = await productService.getProductsByIds(ids);
+        res.status(200).json(products);
+    } catch (error) {
+        next(error);
+    }
+};
+
+module.exports = { getAllProducts, filterProducts, getProductById, getProductsByIds };

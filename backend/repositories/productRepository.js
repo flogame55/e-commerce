@@ -59,9 +59,28 @@ const deleteProduct = (id) => {
 
 const updateProductStock = (productId, quantityToDeduct) => {
     return new Promise((resolve, reject) => {
-        db.run("UPDATE products SET stock = stock - ? WHERE id = ?", [quantityToDeduct, productId], function(err) {
+        const sql = `UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?`;
+        db.run(sql, [quantityToDeduct, productId, quantityToDeduct], function(err) {
             if (err) reject(err);
-            else resolve();
+            else if (this.changes === 0) {
+                const error = new Error(`Insufficient stock for product ${productId}`);
+                error.statusCode = 400;
+                reject(error);
+            } else {
+                resolve();
+            }
+        });
+    });
+};
+
+const getProductsByIds = (ids) => {
+    return new Promise((resolve, reject) => {
+        if (!ids || ids.length === 0) return resolve([]);
+        const placeholders = ids.map(() => '?').join(',');
+        const sql = `SELECT * FROM products WHERE id IN (${placeholders})`;
+        db.all(sql, ids, (err, rows) => {
+            if (err) reject(err);
+            else resolve(rows);
         });
     });
 };
@@ -69,6 +88,7 @@ const updateProductStock = (productId, quantityToDeduct) => {
 module.exports = {
     getFilteredProducts,
     getProductById,
+    getProductsByIds,
     createProduct,
     updateProduct,
     deleteProduct,

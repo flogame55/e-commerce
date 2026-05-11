@@ -1,9 +1,10 @@
 const checkoutService = require('../services/checkoutService');
 
 const checkout = async (req, res, next) => {
-    const { user_id, cartItems } = req.body;
+    const { cartItems } = req.body;
     try {
-        const result = await checkoutService.processCheckout(user_id, cartItems);
+        // req.user is set by authMiddleware from the verified JWT token
+        const result = await checkoutService.processCheckout(req.user.id, cartItems);
         res.status(201).json(result);
     } catch (error) {
         next(error);

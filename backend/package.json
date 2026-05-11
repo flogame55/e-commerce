@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js",
+    "seed": "node seed.js",
+    "init-db": "node scripts/init_db.js",
+    "test": "node scripts/integration_test.js"
   },
   "keywords": [],
   "author": "",
@@ -15,6 +18,7 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.5.1",
     "jsonwebtoken": "^9.0.3",
     "sqlite3": "^6.0.1"
   }

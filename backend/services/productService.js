@@ -53,10 +53,15 @@ const deleteProduct = async (id) => {
     return await productRepository.deleteProduct(id);
 };
 
+const getProductsByIds = async (ids) => {
+    return await productRepository.getProductsByIds(ids);
+};
+
 module.exports = { 
     getProductsFromStorage, 
     getFilteredProducts,
     getProductById,
+    getProductsByIds,
     createProduct,
     updateProduct,
     deleteProduct

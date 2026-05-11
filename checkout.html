@@ -315,37 +315,36 @@
 		// Function to handle the final checkout click
 		async function processCheckout() {
 			const userId = localStorage.getItem('userId');
+			const token = localStorage.getItem('token');
 			
-			if (!userId) {
+			if (!userId || !token) {
 				alert("Error: You must be logged in to place an order.");
 				window.location.href = "login.html";
 				return;
 			}
 
 			const orderData = {
-				user_id: userId,
-				cardNumber: document.getElementById('card-number').value, // kept for simulation, ignored by backend
 				cartItems: cart // From your global cart state
 			};
 
 			try {
-				// Phase 1: Serialize the string for the truck (HTTP Request)[cite: 2]
-				const response = await fetch('http://localhost:3000/api/checkout', {
+				const response = await fetch('/api/checkout', {
 					method: 'POST',
-					headers: { 'Content-Type': 'application/json' }, // Critical Label[cite: 2]
+					headers: {
+						'Content-Type': 'application/json',
+						'Authorization': `Bearer ${token}`
+					},
 					body: JSON.stringify(orderData)
 				});
 
 				const result = await response.json();
 
 				if (response.status === 201) {
-					// SUCCESS: Clear Cart only now[cite: 2]
-					alert(result.message + " Order ID: " + result.orderId);
+					alert(result.message);
 					cart = [];
-					localStorage.removeItem('cart'); // State Management[cite: 2]
+					localStorage.removeItem('cart');
 					window.location.href = 'index.html';
 				} else {
-					// FAIL: Validation or DB error - DO NOT clear cart[cite: 2]
 					alert("Error: " + result.message);
 				}
 			} catch (error) {
